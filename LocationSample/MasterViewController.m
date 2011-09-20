@@ -7,12 +7,16 @@
 //
 
 #import "MasterViewController.h"
+#import <CoreLocation/CoreLocation.h>
 
 #import "DetailViewController.h"
+#import "Venue.h"
 
 @implementation MasterViewController
 
 @synthesize detailViewController = _detailViewController;
+@synthesize venues = _venues;
+@synthesize clManager = _clManager;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -40,7 +44,21 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+	
+	UIBarButtonItem *barbutton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(getLocation)];
+	self.navigationItem.rightBarButtonItem = barbutton;
+
+	_clManager = [[CLLocationManager alloc] init];
+	_clManager.delegate = self;
+
+	Venue *venue = [[Venue alloc] initWithName:@"Marinha" withLatitude:-30.05 withLongitude:-51.20];
+	venue.description = @"Este parque esta jogado as tracasasdajsdlkajsdlja asdasasad asdaksjdasd asdlkasjdasd asdlkasdas dasdk asldk asdasldkasdklsad asdkalf asklf dfsdlkfsdlfksd fsdklf sdfklsdfksdlfksdlfsdkfsdlkf sdlfksdlfksdklf sdlfkdsf dsflksdkf dsflsdkf sdlkflsdkflsdkflsdkf sdfklsdflksdflksdlfksdfsdlkf sklfsdfk sdlfsdklfsdkflskd fslkdf sdlkf sldkfklsdfdslfksdlfksdflksdf lskdf sldkflsdkfsdklfksdlfsdlkfsdlk fdslkfsldkflsdkflsdkfsdklf dlskf lsdkfsdlfskdflsdlfksdfsdlkf sdklfdslkfklsd flksd flksdkflsdfkldskfdslfkdslfkdsfldskfsdlfksdlfksdlf sdflk dsf";
+	NSArray *photos = [[NSArray alloc] initWithObjects:@"marinha1.jpg", @"marinha2.jpg", @"marinha3.jpg", nil];
+	venue.photos = photos;
+	[photos release];
+	
+	NSArray *tmpVenues = [[NSArray alloc] initWithObjects:venue, nil];
+	self.venues = tmpVenues;
 }
 
 - (void)viewDidUnload
@@ -94,12 +112,14 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier] autorelease];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     }
 
     // Configure the cell.
-    cell.textLabel.text = NSLocalizedString(@"Detail", @"Detail");
+	Venue *venue = [self.venues objectAtIndex:indexPath.row];
+	cell.textLabel.text = venue.name;
+	cell.detailTextLabel.text = venue.distance;
     return cell;
 }
 
@@ -146,7 +166,26 @@
     if (!self.detailViewController) {
         self.detailViewController = [[[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil] autorelease];
     }
+	
+	self.detailViewController.venue = [_venues objectAtIndex:indexPath.row];
     [self.navigationController pushViewController:self.detailViewController animated:YES];
 }
 
+#pragma mark - Location Methods
+- (void)getLocation
+{
+	if  (! [CLLocationManager locationServicesEnabled])
+		return;
+	
+	[_clManager startUpdatingLocation];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
+	for (Venue *venue in _venues) {
+		[venue updateDistance:newLocation];
+	}
+	[_clManager stopUpdatingLocation];
+	[self.tableView reloadData];
+}
 @end

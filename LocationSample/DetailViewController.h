@@ -7,11 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Venue.h"
 
 @interface DetailViewController : UIViewController
 
-@property (strong, nonatomic) id detailItem;
+@property (strong, nonatomic) Venue *venue;
 
-@property (strong, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
+@property (strong, nonatomic) IBOutlet UILabel *name;
 
+@property (nonatomic, retain) IBOutlet UITextView *description;
+
+
+- (IBAction)openMap:(id)sender;
+- (IBAction)openPhotos:(id)sender;
 @end

@@ -7,6 +7,8 @@
 //
 
 #import "DetailViewController.h"
+#import "MapView.h"
+#import "PhotosController.h"
 
 @interface DetailViewController ()
 - (void)configureView;
@@ -14,13 +16,14 @@
 
 @implementation DetailViewController
 
-@synthesize detailItem = _detailItem;
-@synthesize detailDescriptionLabel = _detailDescriptionLabel;
+@synthesize venue = _venue;
+@synthesize name = _name;
+@synthesize description = _description;
 
 - (void)dealloc
 {
-    [_detailItem release];
-    [_detailDescriptionLabel release];
+    [_name release];
+    [_venue release];
     [super dealloc];
 }
 
@@ -28,9 +31,9 @@
 
 - (void)setDetailItem:(id)newDetailItem
 {
-    if (_detailItem != newDetailItem) {
-        [_detailItem release]; 
-        _detailItem = [newDetailItem retain]; 
+    if (_venue != newDetailItem) {
+        [_venue release]; 
+        _venue = [newDetailItem retain]; 
 
         // Update the view.
         [self configureView];
@@ -41,8 +44,9 @@
 {
     // Update the user interface for the detail item.
 
-    if (self.detailItem) {
-        self.detailDescriptionLabel.text = [self.detailItem description];
+    if (self.venue) {
+        self.name.text = _venue.name;
+		self.description.text = _venue.description;
     }
 }
 
@@ -70,12 +74,14 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+	self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
+	self.navigationController.navigationBar.translucent = NO;
     [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
-    [super viewDidAppear:animated];
+   [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -98,9 +104,25 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        self.title = NSLocalizedString(@"Detail", @"Detail");
+        self.title = _venue.name;
     }
     return self;
 }
-							
+
+#pragma mark - IBActions
+- (IBAction)openMap:(id)sender
+{
+	MapView *map = [[MapView alloc] init];
+	map.venue = _venue;
+	[self.navigationController pushViewController:map animated:YES];
+	[map release];
+}
+
+- (IBAction)openPhotos:(id)sender
+{
+	PhotosController *photos = [[PhotosController alloc] init];
+	photos.venue = _venue;
+	[self.navigationController pushViewController:photos animated:YES];
+	[photos release];
+}
 @end
